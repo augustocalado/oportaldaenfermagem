@@ -51,6 +51,7 @@ const App = () => {
                   <Route path="/login" element={<Login />} />
                   <Route path="/cadastro" element={<Cadastro />} />
                   <Route path="/sobre" element={<Sobre />} />
+                  <Route path="/contato" element={<Contact />} />
                   <Route path="/cursos/:id" element={<CourseDetail />} />
                   <Route path="/certificados/:id" element={<Certificate />} />
                   <Route path="/checkout/:id" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
