@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -46,8 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const lastUserId = useRef<string | null>(null);
 
   const fetchProfile = async (userId: string) => {
+    if (lastUserId.current === userId && profile) {
+      console.log("AuthContext: Profile already fetched for", userId);
+      setLoading(false);
+      return;
+    }
+    lastUserId.current = userId;
     try {
       const { data, error } = await supabase
         .from("profiles")

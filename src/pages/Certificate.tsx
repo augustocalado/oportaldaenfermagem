@@ -40,11 +40,22 @@ const Certificate = () => {
 
     if (!certificate) {
         return (
-            <div className="flex h-screen flex-col items-center justify-center space-y-4">
-                <p className="text-xl font-medium">Certificado não encontrado.</p>
-                <Button asChild variant="outline">
-                    <Link to="/meus-cursos">Voltar para meus cursos</Link>
-                </Button>
+            <div className="flex h-screen flex-col items-center justify-center space-y-6 px-4 text-center">
+                <div className="h-16 w-16 bg-muted rounded-full flex items-center justify-center mb-2">
+                    <AlertTriangle className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <div className="space-y-2">
+                    <p className="text-xl font-bold">Certificado não encontrado.</p>
+                    <p className="text-muted-foreground max-w-sm">Não localizamos um registro de certificado para este curso e usuário.</p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <Button asChild variant="outline">
+                        <Link to={`/cursos/${id}`}>Voltar ao Curso</Link>
+                    </Button>
+                    <Button asChild>
+                        <Link to="/meus-cursos">Meus Cursos</Link>
+                    </Button>
+                </div>
             </div>
         );
     }

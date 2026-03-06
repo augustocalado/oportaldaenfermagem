@@ -10,7 +10,8 @@ import {
     LogOut,
     Heart,
     Menu,
-    X
+    X,
+    Award
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
@@ -31,6 +32,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
         { icon: BookOpen, label: "Cursos", href: "/admin/courses" },
         { icon: Newspaper, label: "Notícias", href: "/admin/news" },
         { icon: FileText, label: "Materiais", href: "/admin/materials" },
+        { icon: Award, label: "Certificados", href: "/admin/certificates" },
         { icon: Users, label: "Usuários", href: "/admin/users" },
         { icon: Settings, label: "Configurações", href: "/admin/settings" },
     ];
