@@ -25,7 +25,11 @@ const Certificate = () => {
                 .eq("course_id", id)
                 .eq("user_id", user?.id)
                 .single();
-            if (error) throw error;
+            if (error) {
+                console.error("Certificate: fetch error", error);
+                throw error;
+            }
+            console.log("Certificate: fetched data", data);
             return data;
         },
     });
@@ -135,8 +139,9 @@ const Certificate = () => {
                         Certificamos que para os devidos fins que
                     </p>
 
+                    {console.log("Certificate: Rendering certificate content", certificate)}
                     <h2 className="text-3xl md:text-5xl font-bold text-foreground underline decoration-primary/30 underline-offset-8 mb-8 uppercase">
-                        {profile?.full_name_certificate}
+                        {profile?.full_name_certificate || "Nome não informado"}
                     </h2>
 
                     <div className="space-y-4 max-w-2xl">
@@ -144,11 +149,11 @@ const Certificate = () => {
                             concluiu com êxito o curso de aperfeiçoamento profissional em
                         </p>
                         <p className="text-2xl md:text-3xl font-bold text-primary">
-                            {certificate.courses.title}
+                            {certificate?.courses?.title || "Curso não identificado"}
                         </p>
                         <p className="text-lg text-muted-foreground">
-                            com carga horária total de <span className="font-bold text-foreground">{certificate.courses.hours} horas</span>,
-                            realizado em {new Date(certificate.issue_date).toLocaleDateString('pt-BR')}.
+                            com carga horária total de <span className="font-bold text-foreground">{certificate?.courses?.hours || 0} horas</span>,
+                            realizado em {certificate?.issue_date ? new Date(certificate.issue_date).toLocaleDateString('pt-BR') : "Data indefinida"}.
                         </p>
                     </div>
 
