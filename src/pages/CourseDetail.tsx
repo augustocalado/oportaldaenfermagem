@@ -34,8 +34,25 @@ const CourseDetail = () => {
         queryKey: ["enrollment", id, user?.id],
         enabled: !!user && !!id,
         queryFn: async () => {
+            console.log("CourseDetail: fetching enrollment for", id);
             const { data, error } = await supabase
                 .from("course_enrollments")
+                .select("*")
+                .eq("course_id", id)
+                .eq("user_id", user?.id)
+                .maybeSingle();
+            if (error) throw error;
+            return data;
+        },
+    });
+
+    const { data: certificate, isLoading: certLoading, refetch: refetchCertificate } = useQuery({
+        queryKey: ["certificate", id, user?.id],
+        enabled: !!user && !!id && !!enrollment?.completed,
+        queryFn: async () => {
+            console.log("CourseDetail: fetching certificate for", id);
+            const { data, error } = await supabase
+                .from("certificates")
                 .select("*")
                 .eq("course_id", id)
                 .eq("user_id", user?.id)
@@ -72,30 +89,37 @@ const CourseDetail = () => {
 
     const completeMutation = useMutation({
         mutationFn: async () => {
-            const { error } = await supabase
-                .from("course_enrollments")
-                .update({ completed: true, completed_at: new Date().toISOString() })
-                .eq("id", enrollment.id);
-            if (error) throw error;
+            console.log("CourseDetail: starting completeMutation");
+            if (!enrollment.completed) {
+                const { error } = await supabase
+                    .from("course_enrollments")
+                    .update({ completed: true, completed_at: new Date().toISOString() })
+                    .eq("id", enrollment.id);
+                if (error) throw error;
+            }
 
-            // Generate certificate code
-            const certificateCode = `CERT-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-            const { error: certError } = await supabase
-                .from("certificates")
-                .insert({
-                    user_id: user.id,
-                    course_id: id,
-                    enrollment_id: enrollment.id,
-                    certificate_code: certificateCode
-                });
-            if (certError) throw certError;
+            // Generate certificate code if it doesn't exist
+            if (!certificate) {
+                const certificateCode = `CERT-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                const { error: certError } = await supabase
+                    .from("certificates")
+                    .insert({
+                        user_id: user.id,
+                        course_id: id,
+                        enrollment_id: enrollment.id,
+                        certificate_code: certificateCode
+                    });
+                if (certError) throw certError;
+            }
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["enrollment", id, user?.id] });
-            toast.success("Parabéns! Você concluiu o curso.");
+            queryClient.invalidateQueries({ queryKey: ["certificate", id, user?.id] });
+            toast.success("Parabéns! Seu certificado foi gerado.");
         },
         onError: (error: any) => {
-            toast.error("Erro ao concluir curso: " + error.message);
+            console.error("CourseDetail: completeMutation error", error);
+            toast.error("Erro ao processar certificado: " + error.message);
         },
     });
 
@@ -219,14 +243,15 @@ const CourseDetail = () => {
                                             <span className="font-medium text-sm">Você está matriculado neste curso</span>
                                         </div>
 
-                                        {!enrollment.completed ? (
+                                        {!enrollment.completed || !certificate ? (
                                             <Button
                                                 variant="outline"
                                                 className="w-full py-6 text-lg border-2 border-primary text-primary hover:bg-primary/5"
                                                 onClick={() => completeMutation.mutate()}
                                                 disabled={completeMutation.isPending}
                                             >
-                                                {completeMutation.isPending ? "Processando..." : "Marcar como concluído"}
+                                                {completeMutation.isPending ? "Processando..." :
+                                                    !enrollment.completed ? "Marcar como concluído" : "Emitir Certificado"}
                                             </Button>
                                         ) : (
                                             <Button

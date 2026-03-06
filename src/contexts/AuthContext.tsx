@@ -66,6 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
+    console.log("AuthContext: useEffect init");
     let mounted = true;
 
     const initAuth = async () => {
